@@ -66,3 +66,17 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.2.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
 }
+
+// app/build.gradle  (Groovy DSL)
+tasks.register('packForXcode') {
+    group 'build'
+    def mode = System.getenv('CONFIGURATION') ?: 'DEBUG'
+    def framework = kotlin.targets.iosArm64.binaries.getFramework(mode)
+    dependsOn framework.linkTask
+    doLast {
+        copy {
+            from framework.outputDirectory
+            into layout.buildDirectory.dir('xcode-frameworks')
+        }
+    }
+}
