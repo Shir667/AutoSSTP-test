@@ -16,13 +16,13 @@ android {
     defaultConfig { minSdk = 21 }
 }
 
-// Basit task: framework klasörünü kopyalar
+
 tasks.register("packForXcode") {
     group = "build"
     dependsOn("linkDebugFrameworkIosArm64")
     doLast {
-        val fromDir = buildDir.resolve("bin/iosArm64/debugFramework")
-        val toDir  = buildDir.resolve("xcode-frameworks")
-        fromDir.copyRecursively(toDir, overwrite = true)
+        val from = buildDir.resolve("bin/iosArm64/debugFramework")
+        val to   = buildDir.resolve("xcode-frameworks")
+        from.copyRecursively(to, overwrite = true)
     }
 }
