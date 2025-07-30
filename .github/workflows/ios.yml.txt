@@ -1,0 +1,50 @@
+name: iOS IPA (Ücretsiz)
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Java
+      - uses: actions/setup-java@v3
+        with: { distribution: 'zulu', java-version: 17 }
+
+      # Kotlin/Native cache
+      - uses: actions/cache@v3
+        with:
+          path: ~/.konan
+          key: konan-${{ runner.os }}
+
+      # Android uygulaması derle (isteğe bağlı)
+      - run: ./gradlew assembleDebug
+
+      # iOS framework çıkar
+      - run: ./gradlew :app:packForXcode
+
+      # Basit iOS uygulaması + IPA
+      - run: |
+          mkdir iosApp
+          cd iosApp
+          swift package init --type executable
+          xcodebuild \
+            -scheme iosApp \
+            -configuration Release \
+            -archivePath build/Archive.xcarchive \
+            archive \
+            -sdk iphoneos \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO
+          xcodebuild -exportArchive \
+            -archivePath build/Archive.xcarchive \
+            -exportPath build \
+            -exportOptionsPlist ../ExportOptions.plist
+
+      # IPA’yı indirmek için
+      - uses: actions/upload-artifact@v3
+        with:
+          name: AutoSSTP-iOS
+          path: iosApp/build/*.ipa

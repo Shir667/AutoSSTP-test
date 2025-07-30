@@ -55,7 +55,7 @@ class HomeFragment : PreferenceFragmentCompat() {
     private var lastPort: Int = 0
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
-        setPreferencesFromResource(R.xml.hogitme, rootKey)
+        setPreferencesFromResource(R.xml.home, rootKey)
         setupPreferences() // İlk bağlama
     }
     private fun setupPreferences() {
