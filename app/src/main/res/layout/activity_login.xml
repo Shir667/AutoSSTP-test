@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="40dp"
+    android:background="?android:windowBackground"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+<EditText
+    android:id="@+id/etUsername"
+    android:hint="Adynyz"
+    android:inputType="text"
+    android:textColor="?android:textColorPrimary"
+    android:textColorHint="?android:textColorHint"
+    android:background="@drawable/bg_edit_darkgreen"
+    android:layout_marginBottom="16dp"
+    android:layout_width="match_parent"
+    android:layout_height="55dp"
+    android:paddingHorizontal="20dp" />
+
+<EditText
+    android:id="@+id/etPassword"
+    android:hint="Kodunyz"
+    android:inputType="textPassword"
+    android:textColor="?android:textColorPrimary"
+    android:textColorHint="?android:textColorHint"
+    android:background="@drawable/bg_edit_darkgreen"
+    android:layout_marginBottom="20dp"
+    android:layout_width="match_parent"
+    android:layout_height="55dp"
+    android:paddingHorizontal="20dp" />
+
+<TextView
+    android:id="@+id/tvDeviceId"
+    android:text="ID: ---"
+    android:textSize="14sp"
+    android:textColor="?android:textColorPrimary"
+    android:background="@drawable/bg_chip_darkgreen"
+    android:layout_marginBottom="32dp"
+    android:padding="12dp"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content" />
+
+<Button
+    android:id="@+id/btnLogin"
+    android:text="Giriş"
+    android:textAllCaps="false"
+    android:textColor="?android:textColorPrimary"
+    android:textSize="18sp"
+    android:background="@drawable/bg_button_darkgreen"
+    android:layout_width="match_parent"
+    android:layout_height="55dp" />
+
+<ProgressBar
+    android:id="@+id/loading_view"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:visibility="gone" />
+</LinearLayout>

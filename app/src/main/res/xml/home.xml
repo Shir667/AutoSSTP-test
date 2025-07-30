@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <kittoku.osc.preference.custom.HomeHostnamePreference android:key="HOME_HOSTNAME"/>
+    <kittoku.osc.preference.custom.HomeUsernamePreference   android:key="HOME_USERNAME"/>
+    <kittoku.osc.preference.custom.HomePasswordPreference   android:key="HOME_PASSWORD"/>
+
+    <kittoku.osc.preference.custom.SSLPortPreference android:key="SSL_PORT"/>
+    <kittoku.osc.preference.custom.SSLVersionPreference android:key="SSL_VERSION" />
+    <kittoku.osc.preference.custom.SSLDoVerifyPreference android:key="SSL_DO_VERIFY"/>
+
+    <kittoku.osc.preference.custom.HomeConnectorPreference  android:key="HOME_CONNECTOR" android:title="Bağlantı Durumu"/>
+
+    <!-- Yeni kategori ve buton -->
+    <PreferenceCategory android:title="Otomatik İşlemler">
+        <Preference
+            android:key="auto_test"
+            android:title="Bagla" />
+        <Preference
+            android:key="refresh_server"
+            android:title="Sunucu Yenile" />
+        <Preference
+            android:key="stop_all"
+            android:title="Kapat" />
+    </PreferenceCategory>
+
+    <PreferenceCategory>
+        <kittoku.osc.preference.custom.HomeStatusPreference android:key="HOME_STATUS"/>
+    </PreferenceCategory>
+
+</PreferenceScreen>
