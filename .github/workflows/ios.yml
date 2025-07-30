@@ -19,6 +19,9 @@ jobs:
           path: ~/.konan
           key: konan-${{ runner.os }}
 
+      # Gradle wrapper'ı çalıştırılabilir yap
+      - run: chmod +x ./gradlew
+
       # Android uygulaması derle (isteğe bağlı)
       - run: ./gradlew assembleDebug
 
