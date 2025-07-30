@@ -5,9 +5,11 @@ plugins {
 
 kotlin {
     androidTarget()
-    iosArm64()
-    iosX64()
-    iosSimulatorArm64()
+    iosArm64 {          // bu satır framework’ü otomatik oluşturur
+        binaries.framework {
+            baseName = "Shared"
+        }
+    }
 }
 
 android {
@@ -21,8 +23,8 @@ tasks.register("packForXcode") {
     group = "build"
     dependsOn("linkDebugFrameworkIosArm64")
     doLast {
-        val from = buildDir.resolve("bin/iosArm64/debugFramework")
-        val to   = buildDir.resolve("xcode-frameworks")
-        from.copyRecursively(to, overwrite = true)
+        val fromDir = buildDir.resolve("bin/iosArm64/debugFramework")
+        val toDir   = buildDir.resolve("xcode-frameworks")
+        fromDir.copyRecursively(toDir, overwrite = true)
     }
 }
