@@ -1,3 +1,5 @@
+# ExportOptions.plist’i proje köküne geri koy
+@"
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -7,3 +9,4 @@
   <key>compileBitcode</key><false/>
 </dict>
 </plist>
+"@ | Out-File -FilePath ExportOptions.plist -Encoding utf8
