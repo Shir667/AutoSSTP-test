@@ -8,32 +8,30 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-java@v3
         with: { distribution: 'zulu', java-version: 17 }
-
-      - uses: actions/cache@v3
-        with:
-          path: ~/.konan
-          key: konan-${{ runner.os }}
 
       - run: chmod +x ./gradlew
       - run: ./gradlew :shared:packForXcode
 
-      - name: Create minimal iOS app
+      - name: Build iOS .app
         run: |
-          mkdir iosApp
-          cd iosApp
+          # Kaynak yoksa önce dummy oluştur
+          mkdir -p shared/src/iosArm64Main/kotlin
+          echo "object Dummy" > shared/src/iosArm64Main/kotlin/Dummy.kt
 
-          # Basit iOS uygulaması
-          cat > main.m <<'EOF'
-          #import <UIKit/UIKit.h>
-          int main(int argc, char *argv[]) {
-              @autoreleasepool { return UIApplicationMain(argc, argv, nil, nil); }
-          }
-          EOF
+          ./gradlew :shared:linkReleaseFrameworkIosArm64
 
-          cat > Info.plist <<'EOF'
+          # .framework klasörünü al
+          FRAMEWORK=$(find shared/build/bin/iosArm64/releaseFramework -name '*.framework' | head -n 1)
+          if [ -z "$FRAMEWORK" ]; then
+            echo "Framework not found"; exit 1
+          fi
+
+          # Basit iOS .app paketi oluştur
+          mkdir -p AutoSSTP.app
+          cp -R "$FRAMEWORK" AutoSSTP.app/
+          cat > AutoSSTP.app/Info.plist <<'EOF'
           <?xml version="1.0" encoding="UTF-8"?>
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
            "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -49,29 +47,10 @@ jobs:
           </plist>
           EOF
 
-          xcodebuild \
-            -create-xcodeproj \
-            -project AutoSSTP.xcodeproj \
-            -app AutoSSTP \
-            -template default \
-            -sdk iphoneos \
-            -configuration Release \
-            -archivePath build/Archive.xcarchive \
-            archive \
-            -destination 'generic/platform=iOS' \
-            CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGNING_ALLOWED=NO \
-            -quiet
-
-          APP=$(find build/Archive.xcarchive -name '*.app' | head -n 1)
-          if [ -n "$APP" ]; then
-            zip -r AutoSSTP-iOS.zip "$APP"
-          else
-            echo ".app bulunamadı"; exit 1
-          fi
+          zip -r AutoSSTP-iOS.zip AutoSSTP.app
 
       - name: Upload IPA
         uses: actions/upload-artifact@v4
         with:
           name: AutoSSTP-iOS
-          path: iosApp/AutoSSTP-iOS.zip
+          path: AutoSSTP-iOS.zip
