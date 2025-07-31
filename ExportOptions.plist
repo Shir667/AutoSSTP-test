@@ -3,8 +3,8 @@
  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-  <key>method</key><string>development</string>
-  <key>teamID</key><string></string>
+  <key>method</key><string>ad-hoc</string>
   <key>compileBitcode</key><false/>
+  <key>thinning</key><string>&lt;none&gt;</string>
 </dict>
 </plist>
