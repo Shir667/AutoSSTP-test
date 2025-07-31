@@ -9,31 +9,27 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Java
       - uses: actions/setup-java@v3
-        with: { distribution: 'zulu', java-version: 17 }
+        with:
+          distribution: 'zulu'
+          java-version: 17
 
-      # Kotlin/Native cache
       - uses: actions/cache@v3
         with:
           path: ~/.konan
           key: konan-${{ runner.os }}
 
-      # Gradle wrapper'ı çalıştırılabilir yap
-      - run: chmod +x ./gradlew
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
 
-      # Android uygulaması derle (isteğe bağlı)
-      - run: ./gradlew assembleDebug
+      - name: Build shared framework
+        run: ./gradlew :shared:packForXcode
 
-      # iOS framework çıkar
-      - run: ./gradlew :shared:packForXcode
-
-      # Basit iOS uygulaması + IPA
-      - run: |
-          mkdir iosApp
+      - name: Create minimal iOS archive
+        run: |
+          mkdir -p iosApp
           cd iosApp
           swift package init --type executable
-
           xcodebuild \
             -scheme iosApp \
             -configuration Release \
@@ -44,11 +40,18 @@ jobs:
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO
 
-      # .xcarchive → .ipa
-      - run: xcodebuild -exportArchive -archivePath iosApp/build/Archive.xcarchive -exportPath iosApp/build -exportOptionsPlist ExportOptions.plist CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
+      - name: Export IPA
+        run: |
+          cd iosApp
+          xcodebuild -exportArchive \
+            -archivePath build/Archive.xcarchive \
+            -exportPath build \
+            -exportOptionsPlist ../ExportOptions.plist
 
-      # IPA’yı indirmek için
-      - uses: actions/upload-artifact@v4
+      - name: Upload IPA
+        uses: actions/upload-artifact@v4
         with:
           name: AutoSSTP-iOS
-          path: iosApp/build/*.ipa
+          path: |
+            iosApp/build/*.ipa
+            iosApp/build/*.app
