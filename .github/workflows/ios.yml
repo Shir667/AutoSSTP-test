@@ -46,8 +46,7 @@ jobs:
           xcodebuild -exportArchive \
             -archivePath build/Archive.xcarchive \
             -exportPath build \
-            -exportOptionsPlist ../ExportOptions.plist \
-            -allowProvisioningUpdates
+            -exportOptionsPlist ../ExportOptions.plist
 
       - name: Upload IPA
         uses: actions/upload-artifact@v4
