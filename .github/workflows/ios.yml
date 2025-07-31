@@ -25,7 +25,11 @@ jobs:
           mkdir iosApp
           cd iosApp
 
-          # Basit bir iOS app şablonu
+          # Basit bir iOS uygulaması için gerekli dosyalar
+          mkdir AutoSSTP
+          cd AutoSSTP
+
+          # main.m
           cat > main.m <<'EOF'
           #import <UIKit/UIKit.h>
           int main(int argc, char * argv[]) {
@@ -47,13 +51,13 @@ jobs:
             <key>CFBundleVersion</key><string>1</string>
             <key>CFBundleShortVersionString</key><string>1.0</string>
             <key>LSRequiresIPhoneOS</key><true/>
-            <key>UILaunchStoryboardName</key><string></string>
             <key>UIRequiredDeviceCapabilities</key>
             <array><string>arm64</string></array>
           </dict>
           </plist>
           EOF
 
+          # Projeyi oluştur
           xcodebuild \
             -project AutoSSTP.xcodeproj \
             -scheme AutoSSTP \
@@ -66,12 +70,11 @@ jobs:
             CODE_SIGNING_ALLOWED=NO \
             -quiet
 
-          # .app dosyasını bul ve zip’le
           APP=$(find build/Archive.xcarchive -name '*.app' | head -n 1)
           if [ -n "$APP" ]; then
             zip -r AutoSSTP-iOS.zip "$APP"
           else
-            echo "No .app found inside archive"; exit 1
+            echo "No .app found"; exit 1
           fi
 
       - name: Upload IPA
