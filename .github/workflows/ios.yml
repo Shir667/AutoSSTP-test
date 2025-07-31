@@ -36,8 +36,13 @@ jobs:
             CODE_SIGNING_ALLOWED=NO \
             -quiet
 
-          # .app'ı zip'le
-          zip -r AutoSSTP-iOS.zip build/Archive.xcarchive/Products/Applications/*.app
+          # .app dosyasını bul ve zip’le
+          APP=$(find build/Archive.xcarchive -name '*.app' | head -n 1)
+          if [ -n "$APP" ]; then
+            zip -r AutoSSTP-iOS.zip "$APP"
+          else
+            echo "No .app found inside archive"; exit 1
+          fi
 
       - name: Upload IPA
         uses: actions/upload-artifact@v4
