@@ -20,26 +20,19 @@ jobs:
       - run: chmod +x ./gradlew
       - run: ./gradlew :shared:packForXcode
 
-      - name: Create minimal Xcode project
+      - name: Create minimal iOS app
         run: |
           mkdir iosApp
           cd iosApp
 
-          # Basit bir iOS uygulaması için gerekli dosyalar
-          mkdir AutoSSTP
-          cd AutoSSTP
-
-          # main.m
+          # Basit iOS uygulaması
           cat > main.m <<'EOF'
           #import <UIKit/UIKit.h>
-          int main(int argc, char * argv[]) {
-              @autoreleasepool {
-                  return UIApplicationMain(argc, argv, nil, nil);
-              }
+          int main(int argc, char *argv[]) {
+              @autoreleasepool { return UIApplicationMain(argc, argv, nil, nil); }
           }
           EOF
 
-          # Info.plist
           cat > Info.plist <<'EOF'
           <?xml version="1.0" encoding="UTF-8"?>
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
@@ -51,20 +44,20 @@ jobs:
             <key>CFBundleVersion</key><string>1</string>
             <key>CFBundleShortVersionString</key><string>1.0</string>
             <key>LSRequiresIPhoneOS</key><true/>
-            <key>UIRequiredDeviceCapabilities</key>
-            <array><string>arm64</string></array>
+            <key>UIRequiredDeviceCapabilities</key><array><string>arm64</string></array>
           </dict>
           </plist>
           EOF
 
-          # Projeyi oluştur
           xcodebuild \
+            -create-xcodeproj \
             -project AutoSSTP.xcodeproj \
-            -scheme AutoSSTP \
+            -app AutoSSTP \
+            -template default \
+            -sdk iphoneos \
             -configuration Release \
             -archivePath build/Archive.xcarchive \
             archive \
-            -sdk iphoneos \
             -destination 'generic/platform=iOS' \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO \
@@ -74,7 +67,7 @@ jobs:
           if [ -n "$APP" ]; then
             zip -r AutoSSTP-iOS.zip "$APP"
           else
-            echo "No .app found"; exit 1
+            echo ".app bulunamadı"; exit 1
           fi
 
       - name: Upload IPA
