@@ -10,24 +10,19 @@ jobs:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-java@v3
-        with:
-          distribution: 'zulu'
-          java-version: 17
+        with: { distribution: 'zulu', java-version: 17 }
 
       - uses: actions/cache@v3
         with:
           path: ~/.konan
           key: konan-${{ runner.os }}
 
-      - name: Make gradlew executable
-        run: chmod +x ./gradlew
+      - run: chmod +x ./gradlew
+      - run: ./gradlew :shared:packForXcode
 
-      - name: Build shared framework
-        run: ./gradlew :shared:packForXcode
-
-      - name: Create minimal iOS archive
+      - name: Create minimal Xcode project
         run: |
-          mkdir -p iosApp
+          mkdir iosApp
           cd iosApp
           swift package init --type executable
           xcodebuild \
@@ -38,20 +33,14 @@ jobs:
             -sdk iphoneos \
             -destination 'generic/platform=iOS' \
             CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGNING_ALLOWED=NO
+            CODE_SIGNING_ALLOWED=NO \
+            -quiet
 
-      - name: Export IPA
-        run: |
-          cd iosApp
-          xcodebuild -exportArchive \
-            -archivePath build/Archive.xcarchive \
-            -exportPath build \
-            -exportOptionsPlist ../ExportOptions.plist
+          # .app'ı zip'le
+          zip -r AutoSSTP-iOS.zip build/Archive.xcarchive/Products/Applications/*.app
 
       - name: Upload IPA
         uses: actions/upload-artifact@v4
         with:
           name: AutoSSTP-iOS
-          path: |
-            iosApp/build/*.ipa
-            iosApp/build/*.app
+          path: iosApp/AutoSSTP-iOS.zip
