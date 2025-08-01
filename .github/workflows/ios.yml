@@ -16,21 +16,17 @@ jobs:
 
       - name: Build iOS .app
         run: |
-          # Kaynak yoksa önce dummy oluştur
-          mkdir -p shared/src/iosArm64Main/kotlin
-          echo "object Dummy" > shared/src/iosArm64Main/kotlin/Dummy.kt
-
-          ./gradlew :shared:linkReleaseFrameworkIosArm64
-
-          # .framework klasörünü al
-          FRAMEWORK=$(find shared/build/bin/iosArm64/releaseFramework -name '*.framework' | head -n 1)
+          # 1) Framework’ü al
+          FRAMEWORK=$(find shared/build/xcode-frameworks -name '*.framework' | head -n 1)
           if [ -z "$FRAMEWORK" ]; then
-            echo "Framework not found"; exit 1
+            echo "Framework bulunamadı"; exit 1
           fi
 
-          # Basit iOS .app paketi oluştur
+          # 2) Gerçek iOS app klasörü
           mkdir -p AutoSSTP.app
           cp -R "$FRAMEWORK" AutoSSTP.app/
+
+          # 3) Info.plist
           cat > AutoSSTP.app/Info.plist <<'EOF'
           <?xml version="1.0" encoding="UTF-8"?>
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
@@ -47,6 +43,7 @@ jobs:
           </plist>
           EOF
 
+          # 4) Zip’le
           zip -r AutoSSTP-iOS.zip AutoSSTP.app
 
       - name: Upload IPA
