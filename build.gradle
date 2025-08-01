@@ -25,3 +25,16 @@ allprojects {
 tasks.register('clean', Delete) {
     delete rootProject.buildDir
 }
+
+tasks.register('packForXcode') {
+    group 'build'
+    def mode = System.getenv('CONFIGURATION') ?: 'DEBUG'
+    def framework = kotlin.targets.iosArm64.binaries.getFramework(mode)
+    dependsOn framework.linkTask
+    doLast {
+        copy {
+            from framework.outputDirectory
+            into layout.buildDirectory.dir('xcode-frameworks')
+        }
+    }
+}
