@@ -2,7 +2,6 @@ name: iOS IPA (Ücretsiz)
 on:
   push:
     branches: [ main ]
-
 jobs:
   build:
     runs-on: macos-latest
@@ -10,27 +9,30 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v3
         with: { distribution: 'zulu', java-version: 17 }
-
       - run: chmod +x ./gradlew
       - run: ./gradlew :shared:packForXcode
-
       - name: Build iOS .app
         run: |
-          # 1) Framework’ü al
+          # 1) Framework'ü DOĞRU yerden al
           FRAMEWORK=$(find shared/build/xcode-frameworks -name '*.framework' | head -n 1)
           if [ -z "$FRAMEWORK" ]; then
-            echo "Framework bulunamadı"; exit 1
+            echo "❌ Framework bulunamadı. Alternatif deniyoruz..."
+            ./gradlew :shared:linkReleaseFrameworkIosArm64
+            FRAMEWORK=$(find shared/build/bin/iosArm64/releaseFramework -name '*.framework' | head -n 1)
+            if [ -z "$FRAMEWORK" ]; then
+              echo "❌ Alternatif de çalışmadı!"; exit 1
+            fi
           fi
-
-          # 2) Gerçek iOS app klasörü
+          echo "✅ Framework bulundu: $FRAMEWORK"
+          
+          # 2) .app oluştur
           mkdir -p AutoSSTP.app
           cp -R "$FRAMEWORK" AutoSSTP.app/
-
-          # 3) Info.plist
+          
+          # 3) Info.plist ekle
           cat > AutoSSTP.app/Info.plist <<'EOF'
           <?xml version="1.0" encoding="UTF-8"?>
-          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
-           "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
           <plist version="1.0">
           <dict>
             <key>CFBundleIdentifier</key><string>com.example.AutoSSTP</string>
@@ -42,10 +44,13 @@ jobs:
           </dict>
           </plist>
           EOF
-
-          # 4) Zip’le
+          
+          # 4) Kontrol et
+          echo "📦 .app içeriği:"
+          ls -R AutoSSTP.app
+          
+          # 5) Zip'le
           zip -r AutoSSTP-iOS.zip AutoSSTP.app
-
       - name: Upload IPA
         uses: actions/upload-artifact@v4
         with:
