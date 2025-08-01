@@ -21,13 +21,13 @@ android {
 
 tasks.register("packForXcode") {
     group = "build"
-    dependsOn("linkDebugFrameworkIosArm64")
+    // DEĞİŞTİR: Debug yerine RELEASE framework'ü kopyala
+    dependsOn("linkReleaseFrameworkIosArm64")  // <-- BU SATIRI DEĞİŞTİRİN
 
     doLast {
-        val fromDir = buildDir.resolve("bin/iosArm64/debugFramework")
+        val fromDir = buildDir.resolve("bin/iosArm64/releaseFramework")  // <-- releaseFramework
         val toDir   = buildDir.resolve("xcode-frameworks")
 
-        // klasör var mı kontrol et, yoksa oluştur
         if (fromDir.exists()) {
             fromDir.copyRecursively(toDir, overwrite = true)
         } else {
