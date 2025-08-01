@@ -62,8 +62,8 @@ jobs:
           echo "📦 IPA içeriği:"
           unzip -l "$APP_NAME.ipa" | head -20
           
-          # 8. Gerekli izinleri ayarla
-          chmod +x "Payload/$APP_BUNDLE/Shared"
+          # 8. Gerekli izinleri ayarla (DÜZELTİLDİ)
+          chmod +x "Payload/$APP_BUNDLE/Shared.framework/Shared"
       - name: Upload IPA
         uses: actions/upload-artifact@v4
         with:
