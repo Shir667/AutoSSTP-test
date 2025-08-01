@@ -1,4 +1,4 @@
-name: Build iOS IPA
+name: Build Valid iOS IPA
 on:
   push:
     branches: [ main ]
@@ -11,16 +11,18 @@ jobs:
         with: { distribution: 'zulu', java-version: 17 }
       - run: chmod +x ./gradlew
       - run: ./gradlew :shared:linkReleaseFrameworkIosArm64
-      - name: Create IPA
+      - name: Create Valid IPA
         run: |
           # 1. Framework yolunu al
           FRAMEWORK_DIR="shared/build/bin/iosArm64/releaseFramework"
           FRAMEWORK="$FRAMEWORK_DIR/Shared.framework"
+          
           if [ ! -d "$FRAMEWORK" ]; then
-            echo "❌ Framework bulunamadı: $FRAMEWORK"; exit 1
+            echo "❌ Framework bulunamadı: $FRAMEWORK"
+            exit 1
           fi
           
-          # 2. .app klasörünü oluştur
+          # 2. .app oluşturma
           APP_NAME="AutoSSTP"
           APP_BUNDLE="$APP_NAME.app"
           mkdir -p "$APP_BUNDLE"
@@ -34,28 +36,34 @@ jobs:
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
           <plist version="1.0">
           <dict>
+            <key>CFBundleExecutable</key><string>Shared</string>
             <key>CFBundleIdentifier</key><string>com.example.AutoSSTP</string>
             <key>CFBundleName</key><string>AutoSSTP</string>
             <key>CFBundleVersion</key><string>1</string>
             <key>CFBundleShortVersionString</key><string>1.0</string>
+            <key>CFBundlePackageType</key><string>APPL</string>
             <key>LSRequiresIPhoneOS</key><true/>
             <key>UIRequiredDeviceCapabilities</key><array><string>arm64</string></array>
+            <key>MinimumOSVersion</key><string>13.0</string>
           </dict>
           </plist>
           EOF
           
           # 5. IPA yapısını oluştur
-          mkdir Payload
+          mkdir -p Payload
           mv "$APP_BUNDLE" Payload/
           
           # 6. IPA'yı oluştur
           zip -r "$APP_NAME.ipa" Payload/
           
-          # 7. Kontrol et
+          # 7. IPA doğrulama
           echo "✅ IPA oluşturuldu:"
           ls -lh "$APP_NAME.ipa"
           echo "📦 IPA içeriği:"
           unzip -l "$APP_NAME.ipa" | head -20
+          
+          # 8. Gerekli izinleri ayarla
+          chmod +x "Payload/$APP_BUNDLE/Shared"
       - name: Upload IPA
         uses: actions/upload-artifact@v4
         with:
