@@ -1,4 +1,4 @@
-name: iOS IPA (Ücretsiz)
+name: Build iOS IPA
 on:
   push:
     branches: [ main ]
@@ -10,27 +10,26 @@ jobs:
       - uses: actions/setup-java@v3
         with: { distribution: 'zulu', java-version: 17 }
       - run: chmod +x ./gradlew
-      - run: ./gradlew :shared:packForXcode
-      - name: Build iOS .app
+      - run: ./gradlew :shared:linkReleaseFrameworkIosArm64
+      - name: Create IPA
         run: |
-          # 1) Framework'ü DOĞRU yerden al
-          FRAMEWORK=$(find shared/build/xcode-frameworks -name '*.framework' | head -n 1)
-          if [ -z "$FRAMEWORK" ]; then
-            echo "❌ Framework bulunamadı. Alternatif deniyoruz..."
-            ./gradlew :shared:linkReleaseFrameworkIosArm64
-            FRAMEWORK=$(find shared/build/bin/iosArm64/releaseFramework -name '*.framework' | head -n 1)
-            if [ -z "$FRAMEWORK" ]; then
-              echo "❌ Alternatif de çalışmadı!"; exit 1
-            fi
+          # 1. Framework yolunu al
+          FRAMEWORK_DIR="shared/build/bin/iosArm64/releaseFramework"
+          FRAMEWORK="$FRAMEWORK_DIR/Shared.framework"
+          if [ ! -d "$FRAMEWORK" ]; then
+            echo "❌ Framework bulunamadı: $FRAMEWORK"; exit 1
           fi
-          echo "✅ Framework bulundu: $FRAMEWORK"
           
-          # 2) .app oluştur
-          mkdir -p AutoSSTP.app
-          cp -R "$FRAMEWORK" AutoSSTP.app/
+          # 2. .app klasörünü oluştur
+          APP_NAME="AutoSSTP"
+          APP_BUNDLE="$APP_NAME.app"
+          mkdir -p "$APP_BUNDLE"
           
-          # 3) Info.plist ekle
-          cat > AutoSSTP.app/Info.plist <<'EOF'
+          # 3. Framework'ü kopyala
+          cp -R "$FRAMEWORK" "$APP_BUNDLE/"
+          
+          # 4. Info.plist oluştur
+          cat > "$APP_BUNDLE/Info.plist" <<'EOF'
           <?xml version="1.0" encoding="UTF-8"?>
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
           <plist version="1.0">
@@ -45,14 +44,20 @@ jobs:
           </plist>
           EOF
           
-          # 4) Kontrol et
-          echo "📦 .app içeriği:"
-          ls -R AutoSSTP.app
+          # 5. IPA yapısını oluştur
+          mkdir Payload
+          mv "$APP_BUNDLE" Payload/
           
-          # 5) Zip'le
-          zip -r AutoSSTP-iOS.zip AutoSSTP.app
+          # 6. IPA'yı oluştur
+          zip -r "$APP_NAME.ipa" Payload/
+          
+          # 7. Kontrol et
+          echo "✅ IPA oluşturuldu:"
+          ls -lh "$APP_NAME.ipa"
+          echo "📦 IPA içeriği:"
+          unzip -l "$APP_NAME.ipa" | head -20
       - name: Upload IPA
         uses: actions/upload-artifact@v4
         with:
-          name: AutoSSTP-iOS
-          path: AutoSSTP-iOS.zip
+          name: AutoSSTP-IPA
+          path: AutoSSTP.ipa
